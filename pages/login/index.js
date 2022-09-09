@@ -1,14 +1,32 @@
+import { ErrorMessage, Field, Form, Formik } from 'formik';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 import styles from '../../styles/Login.module.css';
 
 export default function Login() {
-  const handleLogin = (event) => {
-    event.preventDefault();
+  const router = useRouter();
 
-    console.log('Submitted');
+  const handleValidation = (values) => {
+    const errors = {};
+    if (!values.email) {
+      errors.email = 'Required';
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+      errors.email = 'Enter a valid email address';
+    }
+    return errors;
+  };
+
+  const handleSubmit = (values, { setSubmitting }) => {
+    // When email does not exist, navigate to dashboard
+    try {
+      router.push('/');
+    } catch (error) {
+      console.error(error);
+    }
+    setSubmitting(false);
   };
 
   return (
@@ -34,18 +52,35 @@ export default function Login() {
         </div>
       </header>
       <main className={styles.main}>
-        <form className={styles.mainWrapper} onSubmit={handleLogin}>
-          <h1 className={styles.signinHeader}>Sign In</h1>
-          <input
-            className={styles.emailInput}
-            type='text'
-            placeholder='Email address'
-          />
-          {/* <p className={styles.emailError}>Error</p> */}
-          <button className={styles.loginBtn} type='submit'>
-            Sign In
-          </button>
-        </form>
+        <Formik
+          initialValues={{ email: '' }}
+          validate={handleValidation}
+          onSubmit={handleSubmit}
+        >
+          {(props) => (
+            <Form className={styles.mainWrapper}>
+              <h1 className={styles.signinHeader}>Sign In</h1>
+              <Field
+                className={styles.emailInput}
+                placeholder='Email address'
+                type='text'
+                name='email'
+              />
+              <ErrorMessage
+                className={styles.emailError}
+                name='email'
+                component='div'
+              />
+              <button
+                className={styles.loginBtn}
+                type='submit'
+                disabled={props.isSubmitting}
+              >
+                Sign In
+              </button>
+            </Form>
+          )}
+        </Formik>
       </main>
     </div>
   );
