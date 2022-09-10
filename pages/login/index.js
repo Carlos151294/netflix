@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+import m from '../../lib/magic';
 import styles from '../../styles/Login.module.css';
 
 export default function Login() {
@@ -19,10 +20,13 @@ export default function Login() {
     return errors;
   };
 
-  const handleSubmit = (values, { setSubmitting }) => {
+  const handleSubmit = async ({ email }, { setSubmitting }) => {
     // When email does not exist, navigate to dashboard
     try {
-      router.push('/');
+      const didToken = await m.auth.loginWithMagicLink({ email });
+      if (didToken) {
+        router.push('/');
+      }
     } catch (error) {
       console.error(error);
     }
